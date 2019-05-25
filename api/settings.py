@@ -9,3 +9,6 @@ default Flask app config upon app creation.
 APISPEC_SWAGGER_URL = '/api/swagger.json'
 APISPEC_SWAGGER_UI_URL = '/api/'
 APISPEC_TITLE = 'flights'
+
+SQLALCHEMY_DATABASE_URI = 'postgresql://localhost/flights'
+SQLALCHEMY_TRACK_MODIFICATIONS = False

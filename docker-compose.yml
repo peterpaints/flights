@@ -5,6 +5,7 @@ services:
     image: flights
     environment:
       - DIRECT_REDIS=1
+      - FLASK_ENV=development
     depends_on:
       - postgres
       - redis
