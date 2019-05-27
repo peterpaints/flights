@@ -9,5 +9,6 @@ flask-SQLAlchemy==2.3.2
 gunicorn
 nose
 psycopg2==2.8.2
+pyjwt==1.7.1
 redis~=3.0.1
 requests>=2.19.0      # includes `certifi` package

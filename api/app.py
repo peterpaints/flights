@@ -8,9 +8,11 @@ import logging
 from flask import Flask, request, jsonify
 from flask_apispec import FlaskApiSpec
 from flask_cors import CORS
+from flask_migrate import Migrate
 
 import api.settings
 from api.endpoints.healthz import healthz
+from api.models.db import db
 
 NAME = 'flights'
 
@@ -29,6 +31,13 @@ def create_app(**config_overrides):
     app = Flask(NAME)
     app.config.from_object(api.settings)  # defaults
     app.config.update(config_overrides)
+
+    # Configure db
+    with app.app_context():
+        db.init_app(app)
+        db.create_all()
+
+    Migrate(app, db)
 
     app.register_blueprint(healthz)
 
