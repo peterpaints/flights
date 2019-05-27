@@ -111,3 +111,4 @@ gcloud-test.env
 
 # Misc
 postgres-data/
+migrations/
