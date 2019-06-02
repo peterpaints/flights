@@ -7,7 +7,6 @@ from flask_apispec import doc, marshal_with, use_kwargs
 
 from api.models.db import Route
 from api.endpoints.util.auth import common_params, login_required, admin_required
-from api.endpoints.util.exception_handler import handle_500
 
 routes = Blueprint('routes', __name__)
 
@@ -33,7 +32,6 @@ class RoutesSchema(mm.Schema):
 @use_kwargs(RouteSchema(), locations=('json', ))
 @marshal_with(RouteSchema())
 @admin_required
-@handle_500
 def create(route):
     """Add a new route."""
     route.save()
@@ -45,7 +43,6 @@ def create(route):
 @doc(params=common_params)
 @marshal_with(RoutesSchema())
 @login_required
-@handle_500
 def get_all():
     """Get all routes."""
     routes = Route.query.all()

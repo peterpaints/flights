@@ -36,6 +36,7 @@ class User(db.Model, Base):
     email = db.Column(db.String(256), nullable=False, unique=True)
     password = db.Column(db.String(256), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    stripe_id = db.Column(db.Integer)
     tickets = db.relationship('Ticket',
                               order_by='Ticket.id',
                               backref='users',

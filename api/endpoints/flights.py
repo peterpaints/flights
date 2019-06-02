@@ -7,7 +7,6 @@ from flask_apispec import doc, marshal_with, use_kwargs
 
 from api.models.db import Flight
 from api.endpoints.util.auth import common_params, login_required, admin_required
-from api.endpoints.util.exception_handler import handle_500
 
 flights = Blueprint('flights', __name__)
 
@@ -60,7 +59,6 @@ flight_request_params = {
 @use_kwargs(FlightSchema(), locations=('json', ))
 @marshal_with(FlightSchema())
 @admin_required
-@handle_500
 def create(flight):
     """Create flight."""
     flight.save()
@@ -72,7 +70,6 @@ def create(flight):
 @doc(params=common_params)
 @marshal_with(FlightsSchema())
 @login_required
-@handle_500
 def get_all():
     """Get all flights."""
     flights = Flight.query.all()
@@ -83,7 +80,6 @@ def get_all():
 @doc(params={**common_params, **flight_request_params})
 @marshal_with(FlightsSchema())
 @login_required
-@handle_500
 def get_by_route():
     """Get flights by route."""
     origin = request.args.get('origin')
@@ -97,7 +93,6 @@ def get_by_route():
 @doc(params=common_params)
 @marshal_with(FlightsSchema())
 @login_required
-@handle_500
 def get_by_origin(origin):
     """Get flights by origin."""
     flights = Flight.query.filter_by(origin=origin).all()
@@ -108,7 +103,6 @@ def get_by_origin(origin):
 @doc(params=common_params)
 @marshal_with(FlightsSchema())
 @login_required
-@handle_500
 def get_by_destination(destination):
     """Get flights by destination."""
     flights = Flight.query.filter_by(destination=destination).all()

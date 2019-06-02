@@ -58,7 +58,7 @@ def create_app(**config_overrides):
     @app.errorhandler(422)
     def handle_unprocessable_entity(err):
         """Emit a helpful message when client gives args that fail validation.
-        https://webargs.readthedocs.io/en/latest/framework_support.html#error-handling
+        https://webargs.readthedocs.io/en/latest/framework_support.html#error-hanydling
         """
         # webargs attaches additional metadata to the `data` attribute
         exc = getattr(err, "exc")
@@ -67,6 +67,11 @@ def create_app(**config_overrides):
         else:
             messages = ["Invalid request"]
         return jsonify({"messages": messages}), 422
+
+    @app.errorhandler(500)
+    def handle_internal_error(err):
+        """Handle 500 erros."""
+        return jsonify({"message": str(err)}), 500
 
     @app.errorhandler
     def handle_generic_error(err):

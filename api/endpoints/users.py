@@ -11,7 +11,7 @@ from flask_apispec import doc, use_kwargs
 
 from api.models.db import User, Photo
 from api.endpoints.util.auth import common_params, login_required
-from api.endpoints.util.exception_handler import handle_500
+from api.settings import file_plugin
 
 users = Blueprint('users', __name__)
 
@@ -25,18 +25,22 @@ class UserRegistrationSchema(mm.Schema):
                                 validate=[mm.validate.Length(min=6, max=36)])
 
 
+@file_plugin.map_to_openapi_type('file', None)
+class FileField(mm.fields.Raw):
+    pass
+
+
 class UserPhotoSchema(mm.Schema):
     class Meta:
         strict = True
 
-    data = mm.fields.Field(
+    data = FileField(
         validate=lambda f: f.mimetype in ["image/jpeg", "image/png"],
         required=True)
 
 
 @users.route('/api/users/register', methods=('POST', ))
 @use_kwargs(UserRegistrationSchema(), locations=('json', ))
-@handle_500
 def register(email, password):
     """Handle POST request at /users/register."""
     try:
@@ -57,7 +61,6 @@ def register(email, password):
 
 @users.route('/api/users/login', methods=('POST', ))
 @use_kwargs(UserRegistrationSchema(), locations=('json', ))
-@handle_500
 def login(email, password):
     """Handle POST request at /users/login."""
     # Get the user object using their email (unique to every user)
@@ -79,11 +82,22 @@ def login(email, password):
         return response, 401
 
 
+@users.route('/api/users/stripe_id', methods=('POST', ))
+@doc(params=common_params)
+@use_kwargs({'stripe_id': mm.fields.Integer()}, locations=('json', ))
+@login_required
+def add_stripe(stripe_id):
+    """Add stripe ID."""
+    user = User.query.filter_by(id=request.user_id)
+    user.stripe_id = stripe_id
+    user.save()
+    return {'message': 'Stripe ID added.'}, 201
+
+
 @users.route('/api/users/photo/upload', methods=('POST', ))
 @doc(params=common_params)
 @use_kwargs(UserPhotoSchema(), locations=('files', ))
 @login_required
-@handle_500
 def upload(data):
     photo = Photo(name=data.filename,
                   data=data.read(),
@@ -96,7 +110,6 @@ def upload(data):
 @users.route('/api/users/photo/download', methods=('GET', ))
 @doc(params=common_params)
 @login_required
-@handle_500
 def download():
     photo = Photo.query.filter_by(uploaded_by=request.user_id).order_by(
         Photo.created_at.desc()).first()
