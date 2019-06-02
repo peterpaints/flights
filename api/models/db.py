@@ -8,6 +8,8 @@ from flask_bcrypt import Bcrypt
 
 db = SQLAlchemy()
 
+SECRET = os.getenv('SECRET', 'secret')
+
 
 class Base(object):
     id = db.Column(db.Integer, primary_key=True, index=True)
@@ -87,7 +89,7 @@ class User(db.Model, Base):
             }
             # create the byte string token using the payload and the SECRET key
             jwt_string = jwt.encode(payload,
-                                    os.getenv('SECRET'),
+                                    SECRET,
                                     algorithm='HS256')
             return jwt_string
 
@@ -100,7 +102,7 @@ class User(db.Model, Base):
         """Decode the access token from the Authorization header."""
         try:
             # try to decode the token using our SECRET variable
-            payload = jwt.decode(token, os.getenv('SECRET'))
+            payload = jwt.decode(token, SECRET)
             return payload['sub']
         except jwt.ExpiredSignatureError:
             # the token is expired, return an error string

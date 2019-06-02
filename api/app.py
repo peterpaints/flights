@@ -12,6 +12,9 @@ from flask_migrate import Migrate
 
 import api.settings
 from api.endpoints.healthz import healthz
+from api.endpoints.users import users
+from api.endpoints.flights import flights
+from api.endpoints.tickets import tickets
 from api.models.db import db
 
 NAME = 'flights'
@@ -40,6 +43,9 @@ def create_app(**config_overrides):
     Migrate(app, db)
 
     app.register_blueprint(healthz)
+    app.register_blueprint(users)
+    app.register_blueprint(flights)
+    app.register_blueprint(tickets)
 
     CORS(app, resources={r"/api/*": {'origins': '*'}})
 
@@ -77,7 +83,7 @@ def create_app(**config_overrides):
 
 def main():
     app = create_app()
-    app.run(host='0.0.0.0', port=8000)
+    app.run(debug=True, host='0.0.0.0', port=8000)
 
 
 if __name__ == '__main__':
