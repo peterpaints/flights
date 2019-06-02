@@ -11,12 +11,12 @@ from flask_apispec import doc, use_kwargs
 
 from api.models.db import User, Photo
 from api.endpoints.util.auth import common_params, login_required
+from api.endpoints.util.exception_handler import handle_500
 
 users = Blueprint('users', __name__)
 
 
 class UserRegistrationSchema(mm.Schema):
-
     class Meta:
         strict = True
 
@@ -26,7 +26,6 @@ class UserRegistrationSchema(mm.Schema):
 
 
 class UserPhotoSchema(mm.Schema):
-
     class Meta:
         strict = True
 
@@ -37,6 +36,7 @@ class UserPhotoSchema(mm.Schema):
 
 @users.route('/api/users/register', methods=('POST', ))
 @use_kwargs(UserRegistrationSchema(), locations=('json', ))
+@handle_500
 def register(email, password):
     """Handle POST request at /users/register."""
     try:
@@ -57,64 +57,49 @@ def register(email, password):
 
 @users.route('/api/users/login', methods=('POST', ))
 @use_kwargs(UserRegistrationSchema(), locations=('json', ))
+@handle_500
 def login(email, password):
     """Handle POST request at /users/login."""
-    try:
-        # Get the user object using their email (unique to every user)
-        user = User.query.filter_by(email=email).first()
+    # Get the user object using their email (unique to every user)
+    user = User.query.filter_by(email=email).first()
 
-        # Try to authenticate the found user using their password
-        if user and user.is_registered_password(password):
-            # Generate the access token.
-            access_token = user.generate_token(user.id)
-            if access_token:
-                response = {
-                    'message': 'You logged in successfully.',
-                    'access_token': access_token.decode()
-                }
-                return response, 200
-        else:
-            # User does not exist. Therefore, we return an error message
+    # Try to authenticate the found user using their password
+    if user and user.is_registered_password(password):
+        # Generate the access token.
+        access_token = user.generate_token(user.id)
+        if access_token:
             response = {
-                'message': 'Invalid email or password. Please try again'
+                'message': 'You logged in successfully.',
+                'access_token': access_token.decode()
             }
-            return response, 401
-
-    except Exception as e:
-        response = {'message': str(e)}
-
-        return response, 500
+            return response, 200
+    else:
+        # User does not exist. Therefore, we return an error message
+        response = {'message': 'Invalid email or password. Please try again'}
+        return response, 401
 
 
 @users.route('/api/users/photo/upload', methods=('POST', ))
 @doc(params=common_params)
 @use_kwargs(UserPhotoSchema(), locations=('files', ))
 @login_required
+@handle_500
 def upload(data):
-    try:
-        photo = Photo(name=data.filename,
-                      data=data.read(),
-                      uploaded_by=request.user_id)
-        photo.save()
-        response = {'message': f'Photo {photo.name} successfully uploaded.'}
-        return response, 201
-    except Exception as e:
-        response = {'message': str(e)}
-
-        return response, 500
+    photo = Photo(name=data.filename,
+                  data=data.read(),
+                  uploaded_by=request.user_id)
+    photo.save()
+    response = {'message': f'Photo {photo.name} successfully uploaded.'}
+    return response, 201
 
 
 @users.route('/api/users/photo/download', methods=('GET', ))
 @doc(params=common_params)
 @login_required
+@handle_500
 def download():
-    try:
-        photo = Photo.query.filter_by(uploaded_by=request.user_id).order_by(
-            Photo.created_at.desc()).first()
-        return send_file(BytesIO(photo.data),
-                         attachment_filename=photo.name,
-                         as_attachment=True)
-    except Exception as e:
-        response = {'message': str(e)}
-
-        return response, 500
+    photo = Photo.query.filter_by(uploaded_by=request.user_id).order_by(
+        Photo.created_at.desc()).first()
+    return send_file(BytesIO(photo.data),
+                     attachment_filename=photo.name,
+                     as_attachment=True)
