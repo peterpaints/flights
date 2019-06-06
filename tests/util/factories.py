@@ -1,6 +1,7 @@
 import factory
+import io
 
-from api.models.db import db, Flight, Route, User
+from api.models.db import db, Flight, Route, User, Photo
 
 
 class ModelFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -25,6 +26,15 @@ class UserFactory(ModelFactory):
     is_admin = factory.Faker('boolean', chance_of_getting_true=0)
 
 
+class PhotoFactory(ModelFactory):
+    class Meta:
+        model = Photo
+
+    name = factory.Faker('file_name', extension='jpg')
+    data = io.BytesIO(b'test_photo').read()
+    uploaded_by = factory.SubFactory(UserFactory)
+
+
 class RouteFactory(ModelFactory):
     class Meta:
         model = Route
@@ -38,8 +48,8 @@ class FlightFactory(ModelFactory):
         model = Flight
 
     capacity = factory.Faker('pyint', min=0, max=999, step=1)
-    origin = factory.LazyAttribute(lambda a: RouteFactory().id)
-    destination = factory.LazyAttribute(lambda a: RouteFactory().id)
+    origin = factory.SubFactory(RouteFactory)
+    destination = factory.SubFactory(RouteFactory)
     departure = factory.Faker('future_datetime',
                               end_date='+1d',
                               tzinfo=None)

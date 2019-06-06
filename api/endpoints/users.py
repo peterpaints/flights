@@ -56,7 +56,7 @@ def register(email, password):
 
     except AssertionError as e:
         response = {'message': str(e)}
-        return response, 401
+        return response, 400
 
 
 @users.route('/api/users/login', methods=('POST', ))
@@ -101,7 +101,7 @@ def add_stripe(stripe_id):
 def upload(data):
     photo = Photo(name=data.filename,
                   data=data.read(),
-                  uploaded_by=request.user_id)
+                  uploaded_by_id=request.user_id)
     photo.save()
     response = {'message': f'Photo {photo.name} successfully uploaded.'}
     return response, 201
@@ -111,7 +111,7 @@ def upload(data):
 @doc(params=common_params)
 @login_required
 def download():
-    photo = Photo.query.filter_by(uploaded_by=request.user_id).order_by(
+    photo = Photo.query.filter_by(uploaded_by_id=request.user_id).order_by(
         Photo.created_at.desc()).first()
     return send_file(BytesIO(photo.data),
                      attachment_filename=photo.name,

@@ -79,7 +79,8 @@ class User(db.Model, Base):
         """Check the password against its hash."""
         return Bcrypt().check_password_hash(self.password, password)
 
-    def generate_token(self, user_id):
+    @staticmethod
+    def generate_token(user_id):
         """Generate the access token."""
         try:
             # set up a payload with an expiration time
@@ -89,9 +90,7 @@ class User(db.Model, Base):
                 'sub': user_id
             }
             # create the byte string token using the payload and the SECRET key
-            jwt_string = jwt.encode(payload,
-                                    SECRET,
-                                    algorithm='HS256')
+            jwt_string = jwt.encode(payload, SECRET, algorithm='HS256')
             return jwt_string
 
         except Exception as e:
@@ -120,7 +119,8 @@ class Photo(db.Model, Base):
 
     name = db.Column(db.String(255), nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)
-    uploaded_by = db.Column(db.Integer, db.ForeignKey(User.id))
+    uploaded_by = db.relationship('User')
+    uploaded_by_id = db.Column(db.Integer, db.ForeignKey(User.id))
 
 
 class Route(db.Model, Base):
@@ -134,13 +134,13 @@ class Route(db.Model, Base):
                                order_by='Flight.id',
                                backref='route_arrivals',
                                cascade='all, delete-orphan',
-                               foreign_keys='Flight.destination',
+                               foreign_keys='Flight.destination_id',
                                lazy='dynamic')
     departures = db.relationship('Flight',
                                  order_by='Flight.id',
                                  backref='route_departures',
                                  cascade='all, delete-orphan',
-                                 foreign_keys='Flight.origin',
+                                 foreign_keys='Flight.origin_id',
                                  lazy='dynamic')
 
     def __repr__(self):
@@ -152,12 +152,17 @@ class Flight(db.Model, Base):
 
     __tablename__ = 'flights'
 
-    capacity = db.Column(db.Numeric(precision=3, asdecimal=False), nullable=False)
-    origin = db.Column(db.Integer, db.ForeignKey(Route.id), nullable=False)
-    destination = db.Column(db.Integer,
-                            db.ForeignKey(Route.id),
-                            db.CheckConstraint('origin <> destination'),
-                            nullable=False)
+    capacity = db.Column(db.Numeric(precision=3, asdecimal=False),
+                         nullable=False)
+    origin_id = db.Column(db.Integer, db.ForeignKey(Route.id), nullable=False)
+    origin = db.relationship('Route', foreign_keys='Flight.origin_id')
+
+    destination_id = db.Column(db.Integer,
+                               db.ForeignKey(Route.id),
+                               db.CheckConstraint('origin_id <> destination_id'),
+                               nullable=False)
+    destination = db.relationship('Route', foreign_keys='Flight.destination_id')
+
     departure = db.Column(db.DateTime(timezone=True))
     arrival = db.Column(db.DateTime(timezone=True),
                         db.CheckConstraint('arrival > departure'))
@@ -169,7 +174,8 @@ class Flight(db.Model, Base):
                               lazy='dynamic')
 
     def __repr__(self):
-        return "<Flight {}: {} {} >".format(self.id, self.origin, self.destination)
+        return "<Flight {}: {} {} >".format(self.id, self.origin,
+                                            self.destination)
 
 
 class Ticket(db.Model, Base):
@@ -177,9 +183,11 @@ class Ticket(db.Model, Base):
 
     __tablename__ = 'tickets'
 
-    flight = db.Column(db.Integer, db.ForeignKey(Flight.id))
+    flight = db.relationship('Flight')
+    flight_id = db.Column(db.Integer, db.ForeignKey(Flight.id))
     paid = db.Column(db.Boolean, default=False)
-    booked_by = db.Column(db.Integer, db.ForeignKey(User.id))
+    booked_by = db.relationship('User')
+    booked_by_id = db.Column(db.Integer, db.ForeignKey(User.id))
 
     def __repr__(self):
         return "<Ticket for flight {}: departing {} and arriving {} >".format(

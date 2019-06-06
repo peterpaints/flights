@@ -1,32 +1,26 @@
 version: '3'
 services:
-  tests-unit: &tests-unit
+  flights_test:
     # build: .
     image: flights
-    command: nosetests -e integration --verbosity 3 ./tests
+    command: ./bin/wait_for_it.sh nosetests -e --verbosity=3 -s ./tests
     environment:
       - DIRECT_REDIS=1
       - FLASK_ENV=development
     volumes:
-      - ./:/flights
-
-  tests-integration: &tests-integration
-    <<: *tests-unit
-    command: >
-      nosetests -e unit --verbosity 3 ./tests
+      - ../:/flights
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
       - redis
-
-  tests-all:
-    <<: *tests-integration
-    command: nosetests --verbosity 3 ./tests
+    stdin_open: true
+    tty: true
 
   postgres:
     image: postgres
     ports:
       - "5432:5432"
+    volumes:
+      - ./createdb.sql:/docker-entrypoint-initdb.d/createdb.sql
 
   redis:
     image: redis:3.2.5-alpine

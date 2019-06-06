@@ -22,7 +22,7 @@ NAME = 'flights'
 docs = FlaskApiSpec()
 
 
-def create_app(**config_overrides):
+def create_app(config_obj=api.settings, **config_overrides):
     """Instantiate and return a configured flask application.
     (See http://flask.pocoo.org/docs/patterns/appfactories/)
 
@@ -32,7 +32,7 @@ def create_app(**config_overrides):
     root_logger.setLevel(level=logging.INFO)
 
     app = Flask(NAME)
-    app.config.from_object(api.settings)  # defaults
+    app.config.from_object(config_obj)  # defaults
     app.config.update(config_overrides)
 
     # Configure db
