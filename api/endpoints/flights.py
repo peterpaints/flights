@@ -15,17 +15,13 @@ class FlightSchema(mm.Schema):
     class Meta:
         strict = True
 
-    origin = mm.fields.Integer(required=True)
-    destination = mm.fields.Integer(required=True)
+    origin_id = mm.fields.Integer(required=True)
+    destination_id = mm.fields.Integer(required=True)
     departure = mm.fields.DateTime(required=True)
     arrival = mm.fields.DateTime(required=True)
     price = mm.fields.Number(required=True)
     capacity = mm.fields.Integer(required=True)
     tickets = mm.fields.List(mm.fields.Integer(), many=True)
-
-    @mm.post_load
-    def make_flight(self, data):
-        return Flight(**data)
 
 
 class FlightsSchema(mm.Schema):
@@ -56,14 +52,14 @@ flight_request_params = {
 
 @flights.route('/api/flights', methods=('POST', ))
 @doc(params=common_params)
-@use_kwargs(FlightSchema(), locations=('json', ))
-@marshal_with(FlightSchema())
+@use_kwargs(FlightSchema().fields, locations=('json', ))
 @admin_required
-def create(flight):
+def create(**kwargs):
     """Create flight."""
+    flight = Flight(**kwargs)
     flight.save()
-    response = {'message': 'Flight created.', 'flight': flight}
-    return response, 200
+    response = {'message': 'Flight created.'}
+    return response, 201
 
 
 @flights.route('/api/flights', methods=('GET', ))

@@ -36,7 +36,7 @@ def admin_required(func):
         access_token = request.headers.get('Authorization')
         if access_token:
             user_id = User.decode_token(access_token)
-            user = User.query.filter_by(id=user_id)
+            user = User.query.get(user_id)
             if not user.is_admin:
                 abort(401, 'You\'re not authorized to perform this action.')
             request.user_id = user_id

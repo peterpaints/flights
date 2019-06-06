@@ -4,7 +4,7 @@ services:
     # build: .
     image: flights
     restart: always
-    # command: python api/app.py
+    command: python api/app.py
     env_file: .env
     environment:
       - DIRECT_REDIS=1
