@@ -157,11 +157,13 @@ class Flight(db.Model, Base):
     origin_id = db.Column(db.Integer, db.ForeignKey(Route.id), nullable=False)
     origin = db.relationship('Route', foreign_keys='Flight.origin_id')
 
-    destination_id = db.Column(db.Integer,
-                               db.ForeignKey(Route.id),
-                               db.CheckConstraint('origin_id <> destination_id'),
-                               nullable=False)
-    destination = db.relationship('Route', foreign_keys='Flight.destination_id')
+    destination_id = db.Column(
+        db.Integer,
+        db.ForeignKey(Route.id),
+        db.CheckConstraint('origin_id <> destination_id'),
+        nullable=False)
+    destination = db.relationship('Route',
+                                  foreign_keys='Flight.destination_id')
 
     departure = db.Column(db.DateTime(timezone=True))
     arrival = db.Column(db.DateTime(timezone=True),

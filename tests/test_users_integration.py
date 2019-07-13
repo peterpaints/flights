@@ -104,7 +104,8 @@ class UserTestCase(BaseTestCase):
 
             result = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 201)
-            self.assertEqual(result['message'], 'Photo test_photo.jpg successfully uploaded.')
+            self.assertEqual(result['message'],
+                             'Photo test_photo.jpg successfully uploaded.')
 
             with self.app.app_context():
                 photo = Photo.query.get(1)
@@ -129,11 +130,10 @@ class UserTestCase(BaseTestCase):
             photo = PhotoFactory()
             access_token = User.generate_token(photo.uploaded_by_id)
 
-        response = self.client.get(
-            '/api/users/photo/download',
-            headers={
-                'Authorization': access_token,
-            })
+        response = self.client.get('/api/users/photo/download',
+                                   headers={
+                                       'Authorization': access_token,
+                                   })
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, photo.data)

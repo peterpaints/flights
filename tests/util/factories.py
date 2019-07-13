@@ -50,9 +50,7 @@ class FlightFactory(ModelFactory):
     capacity = factory.Faker('pyint', min=0, max=999, step=1)
     origin = factory.SubFactory(RouteFactory)
     destination = factory.SubFactory(RouteFactory)
-    departure = factory.Faker('future_datetime',
-                              end_date='+1d',
-                              tzinfo=None)
+    departure = factory.Faker('future_datetime', end_date='+1d', tzinfo=None)
     arrival = factory.Faker('date_time_between',
                             start_date='+1d',
                             end_date='+7d',

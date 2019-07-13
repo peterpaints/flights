@@ -21,14 +21,16 @@ class FlightTestCase(BaseTestCase):
             flight = FlightFactory.build()
 
             response = self.client.post('/api/flights',
-                                        data=json.dumps({
-                                            'origin_id': route_1.id,
-                                            'destination_id': route_2.id,
-                                            'departure': flight.departure,
-                                            'arrival': flight.arrival,
-                                            'price': flight.price,
-                                            'capacity': flight.capacity
-                                        }, cls=JsonEncoderWithDatetime),
+                                        data=json.dumps(
+                                            {
+                                                'origin_id': route_1.id,
+                                                'destination_id': route_2.id,
+                                                'departure': flight.departure,
+                                                'arrival': flight.arrival,
+                                                'price': flight.price,
+                                                'capacity': flight.capacity
+                                            },
+                                            cls=JsonEncoderWithDatetime),
                                         headers={
                                             'Authorization': access_token,
                                             'content-type': 'application/json'
@@ -37,3 +39,13 @@ class FlightTestCase(BaseTestCase):
         result = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 201)
         self.assertEqual(result['message'], 'Flight created.')
+
+    # def test_get_by_route(self):
+    #     """Test can get flight by route taken."""
+    #     with self.app.app_context():
+    #         user = UserFactory()
+    #         access_token = User.generate_token(user.id)
+    #         flight = FlightFactory()
+
+    #         response = self.client.get('/api/flights/route',
+    # )

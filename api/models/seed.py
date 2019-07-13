@@ -23,9 +23,7 @@ def seed_flights():
 
 
 def seed_user(args):
-    UserFactory(email=args.email,
-                password=args.password,
-                is_admin=args.admin)
+    UserFactory(email=args.email, password=args.password, is_admin=args.admin)
 
 
 def main():
