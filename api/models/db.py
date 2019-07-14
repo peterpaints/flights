@@ -130,18 +130,6 @@ class Route(db.Model, Base):
 
     city = db.Column(db.String(255), nullable=False)
     country = db.Column(db.String(255), nullable=False)
-    arrivals = db.relationship('Flight',
-                               order_by='Flight.id',
-                               backref='route_arrivals',
-                               cascade='all, delete-orphan',
-                               foreign_keys='Flight.destination_id',
-                               lazy='dynamic')
-    departures = db.relationship('Flight',
-                                 order_by='Flight.id',
-                                 backref='route_departures',
-                                 cascade='all, delete-orphan',
-                                 foreign_keys='Flight.origin_id',
-                                 lazy='dynamic')
 
     def __repr__(self):
         return "<Route: {}>".format(self.city, self.country)
@@ -154,16 +142,15 @@ class Flight(db.Model, Base):
 
     capacity = db.Column(db.Numeric(precision=3, asdecimal=False),
                          nullable=False)
-    origin_id = db.Column(db.Integer, db.ForeignKey(Route.id), nullable=False)
-    origin = db.relationship('Route', foreign_keys='Flight.origin_id')
+    origin_id = db.Column(db.Integer, db.ForeignKey('routes.id'), nullable=False)
+    origin = db.relationship('Route', foreign_keys=[origin_id])
 
     destination_id = db.Column(
         db.Integer,
-        db.ForeignKey(Route.id),
+        db.ForeignKey('routes.id'),
         db.CheckConstraint('origin_id <> destination_id'),
         nullable=False)
-    destination = db.relationship('Route',
-                                  foreign_keys='Flight.destination_id')
+    destination = db.relationship('Route', foreign_keys=[destination_id])
 
     departure = db.Column(db.DateTime(timezone=True))
     arrival = db.Column(db.DateTime(timezone=True),

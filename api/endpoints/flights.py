@@ -80,26 +80,26 @@ def get_by_route():
     """Get flights by route."""
     origin = request.args.get('origin')
     destination = request.args.get('destination')
-    flights = Flight.query.filter_by(origin=origin,
-                                     destination=destination).all()
+    flights = Flight.query.filter_by(origin_id=origin,
+                                     destination_id=destination).all()
     return {'flights': flights}, 200
 
 
-@flights.route('/api/flights/<int:origin>', methods=('GET', ))
+@flights.route('/api/flights/origin/<int:origin>', methods=('GET', ))
 @doc(params=common_params)
 @marshal_with(FlightsSchema())
 @login_required
 def get_by_origin(origin):
     """Get flights by origin."""
-    flights = Flight.query.filter_by(origin=origin).all()
+    flights = Flight.query.filter_by(origin_id=origin).all()
     return {'flights': flights}, 200
 
 
-@flights.route('/api/flights/<int:destination>', methods=('GET', ))
+@flights.route('/api/flights/destination/<int:destination>', methods=('GET', ))
 @doc(params=common_params)
 @marshal_with(FlightsSchema())
 @login_required
 def get_by_destination(destination):
     """Get flights by destination."""
-    flights = Flight.query.filter_by(destination=destination).all()
+    flights = Flight.query.filter_by(destination_id=destination).all()
     return {'flights': flights}, 200
