@@ -15,11 +15,7 @@ class TicketSchema(mm.Schema):
     class Meta:
         strict = True
 
-    flight = mm.fields.Integer(required=True)
-
-    @mm.post_load
-    def make_ticket(self, data):
-        return Ticket(**data)
+    flight_id = mm.fields.Integer(required=True)
 
 
 class TicketsSchema(mm.Schema):
@@ -29,9 +25,8 @@ class TicketsSchema(mm.Schema):
 @tickets.route('/api/tickets/book', methods=('POST', ))
 @doc(params=common_params)
 @use_kwargs(TicketSchema(), locations=('json', ))
-@marshal_with(TicketSchema())
 @login_required
-def create(ticket):
+def create(**kwargs):
     """Book a ticket."""
     # user = User.query.filter_by(id=request.user_id)
     # flight = Flight.query.filter_by(id=ticket.flight)
@@ -40,10 +35,11 @@ def create(ticket):
     #                      amount=flight.price,
     #                      currency='usd',
     #                      description='Ticket booking')
+    ticket = Ticket(**kwargs)
     ticket.paid = True
-    ticket.booked_by = request.user_id
+    ticket.booked_by_id = request.user_id
     ticket.save()
-    response = {'message': 'Ticket successfully booked.', 'ticket': ticket}
+    response = {'message': 'Ticket successfully booked.'}
     # except stripe.CardError as e:
     #     return {'message': str(e)}, 400
 
@@ -54,9 +50,9 @@ def create(ticket):
 @doc(params=common_params)
 @marshal_with(TicketsSchema())
 @admin_required
-def get_all(user_id):
+def get_by_user(user_id):
     """Get all tickets booked by user."""
-    tickets = Ticket.query.filter_by(booked_by=user_id)
+    tickets = Ticket.query.filter_by(booked_by_id=user_id)
     return {'tickets': tickets}, 200
 
 
@@ -66,7 +62,7 @@ def get_all(user_id):
 @login_required
 def get_mine():
     """Get all tickets booked by user."""
-    tickets = Ticket.query.filter_by(booked_by=request.user_id)
+    tickets = Ticket.query.filter_by(booked_by_id=request.user_id)
     return {'tickets': tickets}, 200
 
 
@@ -75,8 +71,8 @@ def get_mine():
 @login_required
 def cancel(ticket_id):
     """Get flights by route."""
-    current_user = User.query.filter_by(id=request.user_id)
-    ticket = Ticket.query.filter_by(id=ticket_id)
-    if ticket.booked_by == request.user_id or current_user.is_admin:
+    current_user = User.query.filter_by(id=request.user_id).first()
+    ticket = Ticket.query.filter_by(id=ticket_id).first()
+    if ticket.booked_by_id == (request.user_id or current_user.is_admin):
         ticket.delete()
     return {'message': 'Ticket successfully cancelled.'}, 200

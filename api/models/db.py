@@ -172,11 +172,11 @@ class Ticket(db.Model, Base):
 
     __tablename__ = 'tickets'
 
+    flight_id = db.Column(db.Integer, db.ForeignKey('flights.id'))
     flight = db.relationship('Flight')
-    flight_id = db.Column(db.Integer, db.ForeignKey(Flight.id))
     paid = db.Column(db.Boolean, default=False)
+    booked_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     booked_by = db.relationship('User')
-    booked_by_id = db.Column(db.Integer, db.ForeignKey(User.id))
 
     def __repr__(self):
         return "<Ticket for flight {}: departing {} and arriving {} >".format(

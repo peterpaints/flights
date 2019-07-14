@@ -1,7 +1,7 @@
 import factory
 import io
 
-from api.models.db import db, Flight, Route, User, Photo
+from api.models.db import db, Flight, Route, User, Photo, Ticket
 
 
 class ModelFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -59,3 +59,12 @@ class FlightFactory(ModelFactory):
                           left_digits=2,
                           right_digits=2,
                           positive=True)
+
+
+class TicketFactory(ModelFactory):
+    class Meta:
+        model = Ticket
+
+    flight = factory.SubFactory(FlightFactory)
+    paid = factory.Faker('boolean', chance_of_getting_true=100)
+    booked_by = factory.SubFactory(UserFactory)
