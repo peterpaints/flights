@@ -18,10 +18,6 @@ class RouteSchema(mm.Schema):
     city = mm.fields.String(required=True)
     country = mm.fields.String(required=True)
 
-    @mm.post_load
-    def make_route(self, data):
-        return Route(**data)
-
 
 class RoutesSchema(mm.Schema):
     routes = mm.fields.Nested(RouteSchema, many=True)
@@ -30,12 +26,12 @@ class RoutesSchema(mm.Schema):
 @routes.route('/api/routes', methods=('POST', ))
 @doc(params=common_params)
 @use_kwargs(RouteSchema(), locations=('json', ))
-@marshal_with(RouteSchema())
 @admin_required
-def create(route):
+def create(**kwargs):
     """Add a new route."""
+    route = Route(**kwargs)
     route.save()
-    response = {'message': 'Route successfully added.', 'route': route}
+    response = {'message': 'Route successfully added.'}
     return response, 201
 
 

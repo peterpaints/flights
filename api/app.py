@@ -14,6 +14,7 @@ import api.settings
 from api.endpoints.healthz import healthz
 from api.endpoints.users import users
 from api.endpoints.flights import flights
+from api.endpoints.routes import routes
 from api.endpoints.tickets import tickets
 from api.models.db import db
 
@@ -45,6 +46,7 @@ def create_app(config_obj=api.settings, **config_overrides):
     app.register_blueprint(healthz)
     app.register_blueprint(users)
     app.register_blueprint(flights)
+    app.register_blueprint(routes)
     app.register_blueprint(tickets)
 
     CORS(app, resources={r"/api/*": {'origins': '*'}})
