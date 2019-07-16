@@ -1,12 +1,14 @@
 """
 /tickets endpoint.
 """
+import json
 import marshmallow as mm
 from flask import Blueprint, request
 from flask_apispec import doc, marshal_with, use_kwargs
 
 from api.models.db import Ticket, User
 from api.endpoints.util.auth import common_params, login_required, admin_required
+from api.util import cache
 
 tickets = Blueprint('tickets', __name__)
 
@@ -47,22 +49,40 @@ def create(**kwargs):
 
 
 @tickets.route('/api/tickets/<int:user_id>', methods=('GET', ))
-@doc(params=common_params)
+@doc(params={**common_params, **cache.cache_params})
 @marshal_with(TicketsSchema())
 @admin_required
 def get_by_user(user_id):
     """Get all tickets booked by user."""
-    tickets = Ticket.query.filter_by(booked_by_id=user_id)
+    use_cache = cache.parse_use_cache(request.headers)
+    cached_tickets = cache.get_data_from_redis([f'user_{user_id}'])
+    if cached_tickets and use_cache:
+        tickets = cached_tickets.get(f'user_{user_id}')
+        return {'tickets': tickets}, 200
+
+    tickets = Ticket.query.filter_by(booked_by_id=user_id).all()
+    if tickets:
+        cache.cache_data_in_redis({f'user_{user_id}': [TicketSchema().dump(ticket).data
+                                                       for ticket in tickets]})
     return {'tickets': tickets}, 200
 
 
 @tickets.route('/api/tickets/mine', methods=('GET', ))
-@doc(params=common_params)
+@doc(params={**common_params, **cache.cache_params})
 @marshal_with(TicketsSchema())
 @login_required
 def get_mine():
     """Get all tickets booked by user."""
+    use_cache = cache.parse_use_cache(request.headers)
+    cached_tickets = cache.get_data_from_redis([f'user_{request.user_id}'])
+    if cached_tickets and use_cache:
+        tickets = cached_tickets.get(f'user_{request.user_id}')
+        return {'tickets': tickets}, 200
+
     tickets = Ticket.query.filter_by(booked_by_id=request.user_id)
+    if tickets:
+        cache.cache_data_in_redis({f'user_{request.user_id}': [TicketSchema().dump(ticket).data
+                                                               for ticket in tickets]})
     return {'tickets': tickets}, 200
 
 
