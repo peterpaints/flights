@@ -1,7 +1,6 @@
 """
 /tickets endpoint.
 """
-import json
 import marshmallow as mm
 from flask import Blueprint, request
 from flask_apispec import doc, marshal_with, use_kwargs

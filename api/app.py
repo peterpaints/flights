@@ -60,10 +60,14 @@ def create_app(config_obj=api.settings, **config_overrides):
     @app.errorhandler(422)
     def handle_unprocessable_entity(err):
         """Emit a helpful message when client gives args that fail validation.
-        https://webargs.readthedocs.io/en/latest/framework_support.html#error-hanydling
+        https://webargs.readthedocs.io/en/latest/framework_support.html#error-handling
         """
         # webargs attaches additional metadata to the `data` attribute
-        exc = getattr(err, "exc")
+        try:
+            exc = getattr(err, "exc")
+        except:
+            return jsonify({"messages": err.description}), 422
+
         if exc:
             messages = exc.messages  # get validations from the ValidationError object
         else:

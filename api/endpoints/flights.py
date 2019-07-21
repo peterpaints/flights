@@ -2,8 +2,10 @@
 /flights endpoint.
 """
 import marshmallow as mm
-from flask import Blueprint, request
+from flask import Blueprint, request, abort
 from flask_apispec import doc, marshal_with, use_kwargs
+from sqlalchemy import and_
+from datetime import datetime, timedelta
 
 from api.models.db import Flight
 from api.endpoints.util.auth import common_params, login_required, admin_required
@@ -49,6 +51,23 @@ flight_request_params = {
     }
 }
 
+date_range_params = {
+    'from': {
+        'description': 'start date e.g. 2019-07-19T00:00:00',
+        'in': 'query',
+        'type': 'string',
+        'format': 'date-time',
+        'required': False
+    },
+    'to': {
+        'description': 'end date e.g. 2019-07-19T00:00:00',
+        'in': 'query',
+        'type': 'string',
+        'format': 'date-time',
+        'required': False
+    }
+}
+
 
 @flights.route('/api/flights', methods=('POST', ))
 @doc(params=common_params)
@@ -63,12 +82,28 @@ def create(**kwargs):
 
 
 @flights.route('/api/flights', methods=('GET', ))
-@doc(params=common_params)
+@doc(params={**common_params, **date_range_params})
 @marshal_with(FlightsSchema())
 @login_required
 def get_all():
     """Get all flights."""
-    flights = Flight.query.all()
+    from_str = request.args.get('from')
+    to_str = request.args.get('to')
+    try:
+        if not from_str:
+            from_date = datetime.today()
+        else:
+            from_date = datetime.strptime(from_str, '%Y-%m-%dT%H:%M:%S')
+
+        if not to_str:
+            to_date = from_date + timedelta(days=7)
+        else:
+            to_date = datetime.strptime(to_str, '%Y-%m-%dT%H:%M:%S')
+    except Exception as exc:
+        abort(422, str(exc))
+
+    flights = Flight.query.filter(
+        and_(Flight.departure >= from_date, Flight.arrival <= to_date)).all()
     return {'flights': flights}, 200
 
 

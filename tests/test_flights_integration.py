@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 
 from api.models.db import User
 from tests.base import BaseTestCase
@@ -61,6 +62,61 @@ class FlightTestCase(BaseTestCase):
             self.assertEqual(result['flights'][0]['destination_id'], flight_1.destination_id)
             self.assertEqual(result['flights'][1]['origin_id'], flight_2.origin_id)
             self.assertEqual(result['flights'][1]['destination_id'], flight_2.destination_id)
+
+    def test_get_all_flights_with_date_range(self):
+        """Test can get all flights filtered by date range."""
+        with self.app.app_context():
+            user = UserFactory()
+            access_token = User.generate_token(user.id)
+            flight_1 = FlightFactory()
+
+            with self.subTest('Raise an error for dates with wrong format'):
+                response = self.client.get('/api/flights',
+                                           query_string={
+                                               'from': 'not-a-real-date',
+                                               'to': 'also-not-real'
+                                           },
+                                           headers={
+                                               'Authorization': access_token,
+                                               'content-type': 'application/json'
+                                           })
+
+                result = json.loads(response.data.decode())
+                self.assertEqual(response.status_code, 422)
+                self.assertIn("does not match format '%Y-%m-%dT%H:%M:%S'", result['messages'])
+
+            with self.subTest('No results for flights in the past'):
+                response = self.client.get('/api/flights',
+                                           query_string={
+                                               'from': '2018-07-19T00:00:00',
+                                               'to': '2018-07-23T00:00:00'
+                                           },
+                                           headers={
+                                               'Authorization': access_token,
+                                               'content-type': 'application/json'
+                                           })
+
+                result = json.loads(response.data.decode())
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(len(result['flights']), 0)
+
+            with self.subTest('Results adhere to date range filter'):
+                from_date = flight_1.departure - timedelta(days=1)
+                to_date = flight_1.arrival + timedelta(days=1)
+
+                response = self.client.get('/api/flights',
+                                           query_string={
+                                               'from': from_date.strftime('%Y-%m-%dT%H:%M:%S'),
+                                               'to': to_date.strftime('%Y-%m-%dT%H:%M:%S')
+                                           },
+                                           headers={
+                                               'Authorization': access_token,
+                                               'content-type': 'application/json'
+                                           })
+
+                result = json.loads(response.data.decode())
+                self.assertEqual(response.status_code, 200)
+                self.assertGreater(len(result['flights']), 0)
 
     def test_get_by_route(self):
         """Test can get flight by route taken."""
