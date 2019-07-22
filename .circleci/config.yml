@@ -1,11 +1,14 @@
 version: 2.1
 references:
-
 jobs:
   build:
     machine: true # required to use volumes in docker-compose: https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
     steps:
       - checkout
+      - run:
+          name: Set Environment Variables
+          command: |
+            echo 'export COVERALLS_REPO_TOKEN=${COVERALLS_REPO_TOKEN}' >> ${HOME}/project/tests/.env
       - run:
           name: Run tests
           command: |
