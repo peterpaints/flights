@@ -1,8 +1,10 @@
 version: '3'
 services:
   flights_test:
-    # build: .
-    image: flights
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    # image: flights
     command: ./bin/wait_for_it.sh nosetests -e --verbosity=3 -s ./tests
     environment:
       - DIRECT_REDIS=1
