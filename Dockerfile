@@ -15,7 +15,7 @@ RUN apt-get update && apt-get -y install \
 RUN pip install --upgrade-strategy only-if-needed --no-cache-dir -q \
         -r requirements.txt
 
-RUN ["chmod", "+x", "`ls bin/*.sh`"]
+RUN ["chmod", "+x", "bin/startup.sh", "bin/wait_for_it.sh"]
 
 ENV PYTHONPATH $PYTHONPATH:/flights/
 
