@@ -10,3 +10,4 @@ jobs:
           name: Run tests
           command: |
             docker-compose -f tests/docker-compose.yml run flights_test
+            docker-compose -f tests/docker-compose.yml run flights_test bash -c 'coveralls'
