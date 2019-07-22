@@ -47,7 +47,7 @@ class FlightFactory(ModelFactory):
     class Meta:
         model = Flight
 
-    capacity = factory.Faker('pyint', min=0, max=999, step=1)
+    capacity = factory.Faker('pyint', min_value=0, max_value=999, step=1)
     origin = factory.SubFactory(RouteFactory)
     destination = factory.SubFactory(RouteFactory)
     departure = factory.Faker('future_datetime', end_date='+1d', tzinfo=None)
