@@ -1,0 +1,12 @@
+version: 2.1
+references:
+
+jobs:
+  build_and_test:
+    machine: true # required to use volumes in docker-compose: https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
+    steps:
+      - checkout
+      - run:
+          name: Run tests
+          command: |
+            docker-compose -f tests/docker-compose.yml run flights_test

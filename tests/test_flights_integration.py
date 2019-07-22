@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from api.models.db import User
 from tests.base import BaseTestCase
