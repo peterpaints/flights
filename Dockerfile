@@ -1,14 +1,22 @@
-FROM continuumio/miniconda:latest
+FROM continuumio/miniconda3:latest
 LABEL maintainer="musonyengigi@gmail.com"
-LABEL description="Exposes recipe search models via a Python2 Flask-based web service."
+LABEL description="Ticket booking and flights reservation micro api."
 
-ADD devops/python/* /home/docker/
+COPY . /flights
+WORKDIR /flights/
+
+RUN apt-get update && apt-get -y install \
+    build-essential \
+    python3-dev \
+    libpq-dev \
+    postgresql-client \
+    netcat
 
 RUN pip install --upgrade-strategy only-if-needed --no-cache-dir -q \
         -r requirements.txt
 
-ADD . /tajine
-ENV PYTHONPATH $PYTHONPATH:/tajine/
-WORKDIR /tajine/
+RUN ["chmod", "+x", "bin/startup.sh", "bin/wait_for_it.sh"]
 
-CMD ["gunicorn", "-w", "1", "-b", "0.0.0.0:6100", "--timeout", "350", "--access-logformat", "%(h)s %(l)s %(t)s \"%(r)s\" %(s)s %(b)sB %(L)ss \"%(a)s\"", "--access-logfile", "-", "tajine.unicorn:app"]
+ENV PYTHONPATH $PYTHONPATH:/flights/
+
+CMD ["bin/startup.sh"]

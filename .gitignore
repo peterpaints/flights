@@ -108,3 +108,7 @@ gcloud-test.env
 
 # mypy
 .mypy_cache/
+
+# Misc
+postgres-data/
+migrations/

@@ -1,0 +1,16 @@
+coverage
+coveralls
+ensure~=0.7.0
+factory_boy~=2.11
+flask~=1.0.2
+flask-apispec~=0.8.0    # includes webargs (request parsing), marshmallow (response formatting), apispec (Swagger)
+flask-bcrypt==0.7.1
+flask_cors~=3.0.7
+flask-migrate==2.1.1
+flask-SQLAlchemy==2.3.2
+gunicorn
+nose
+psycopg2==2.8.2
+pyjwt==1.7.1
+redis~=3.0.1
+requests>=2.19.0      # includes `certifi` package

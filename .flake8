@@ -1,0 +1,5 @@
+[flake8]
+ignore =
+    # Missing newline before sections or imports
+    I201
+max-line-length = 99
