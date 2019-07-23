@@ -5,7 +5,8 @@ services:
       context: ../
       dockerfile: Dockerfile
     # image: flights
-    command: ./bin/wait_for_it.sh nosetests -e --verbosity=3 -s ./tests nose --with-coverage --cover-package=api
+    command: ./bin/wait_for_it.sh nosetests --verbosity=3 -s ./tests nose --with-coverage --cover-package=api --cover-erase
+    env_file: .env
     environment:
       - DIRECT_REDIS=1
       - FLASK_ENV=development

@@ -3,8 +3,18 @@ references:
 jobs:
   build:
     machine: true # required to use volumes in docker-compose: https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
+    parameters:
+      coveralls_repo_token:
+        description: "Coveralls repo token"
+        default: COVERALLS_REPO_TOKEN
+        type: env_var_name
     steps:
       - checkout
+      - run:
+          name: Set Environment Variables
+          command: |
+            echo 'COVERALLS_SERVICE_NAME=circleci' >> ${HOME}/project/tests/.env
+            echo 'COVERALLS_REPO_TOKEN=${<< parameters.coveralls_repo_token >>}' >> ${HOME}/project/tests/.env
       - run:
           name: Run tests
           command: |
@@ -12,5 +22,4 @@ jobs:
       - run:
           name: Coveralls
           command: |
-            pip install coveralls
-            coveralls
+            docker-compose -f tests/docker-compose.yml run flights_test bash -c 'coveralls'
