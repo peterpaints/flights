@@ -1,4 +1,4 @@
-celery==4.30
+celery~=4.3.0
 coverage
 coveralls
 ensure~=0.7.0
