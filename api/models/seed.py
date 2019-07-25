@@ -2,14 +2,14 @@
 A script for seeding the database
 To run, call the script along with the desired arguments:
 ```sh
-> docker compose run flights python api/models/seed.py --email bla@bla.com --password Password1 --admin True
+> docker-compose run flights python api/models/seed.py --email bla@bla.com --password Password1 --admin True
 ```
 """
 import argparse
 import factory
 
 from api import app
-from tests.util.factories import FlightFactory, RouteFactory, UserFactory
+from tests.util.factories import FlightFactory, RouteFactory, UserFactory, TicketFactory
 
 
 def seed_routes():
@@ -24,6 +24,11 @@ def seed_flights():
 
 def seed_user(args):
     UserFactory(email=args.email, password=args.password, is_admin=args.admin)
+
+
+def seed_tickets():
+    for i in range(5):
+        TicketFactory()
 
 
 def main():
@@ -61,6 +66,7 @@ def main():
         seed_routes()
         seed_flights()
         seed_user(args)
+        seed_tickets()
 
 
 if __name__ == '__main__':

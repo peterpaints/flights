@@ -179,5 +179,4 @@ class Ticket(db.Model, Base):
     booked_by = db.relationship('User')
 
     def __repr__(self):
-        return "<Ticket for flight {}: departing {} and arriving {} >".format(
-            self.flight.origin.city, self.flight.destination.city)
+        return "<Ticket for flight {}: ".format(self.flight_id)

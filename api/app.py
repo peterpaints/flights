@@ -17,6 +17,7 @@ from api.endpoints.flights import flights
 from api.endpoints.routes import routes
 from api.endpoints.tickets import tickets
 from api.models.db import db
+from notifier.settings import mail_settings
 
 NAME = 'flights'
 
@@ -35,6 +36,7 @@ def create_app(config_obj=api.settings, **config_overrides):
     app = Flask(NAME)
     app.config.from_object(config_obj)  # defaults
     app.config.update(config_overrides)
+    app.config.update(mail_settings)
 
     # Configure db
     with app.app_context():

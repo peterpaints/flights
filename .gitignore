@@ -112,3 +112,6 @@ gcloud-test.env
 # Misc
 postgres-data/
 migrations/
+*.bak
+*.dat
+*.dir
