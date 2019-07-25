@@ -4,7 +4,7 @@ services:
     build: .
     # image: flights
     restart: always
-    # command: python api/app.py
+    # command: bin/wait_for_it.sh python api/app.py
     env_file: .env
     environment:
       - DIRECT_REDIS=1
@@ -28,8 +28,8 @@ services:
       - ./postgres-data:/var/lib/postgresql/data
 
   beat_scheduler:
-    # build: .
-    image: flights
+    build: .
+    # image: flights
     command: bin/wait_for_it.sh celery -A notifier.notify beat --loglevel=info
     env_file: .env
     volumes:
@@ -39,8 +39,8 @@ services:
       - redis
 
   notifier:
-    # build: .
-    image: flights
+    build: .
+    # image: flights
     command: bin/wait_for_it.sh celery -A notifier.notify worker -l info
     env_file: .env
     volumes:
