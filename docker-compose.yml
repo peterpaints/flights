@@ -27,6 +27,27 @@ services:
       - ./createdb.sql:/docker-entrypoint-initdb.d/createdb.sql
       - ./postgres-data:/var/lib/postgresql/data
 
+  beat_scheduler:
+    # build: .
+    image: flights
+    command: celery -A notifier beat --loglevel=info
+    env_file: .env
+    volumes:
+      - ./:/flights
+    depends_on:
+      - redis
+
+  notifier:
+    # build: .
+    image: flights
+    command: celery -A notifier worker -l info
+    env_file: .env
+    volumes:
+      - ./:/flights
+    depends_on:
+      - redis
+      - beat_scheduler
+
   redis:
     image: redis:3.2.5-alpine
     ports:
