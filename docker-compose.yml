@@ -30,21 +30,23 @@ services:
   beat_scheduler:
     # build: .
     image: flights
-    command: celery -A notifier beat --loglevel=info
+    command: bin/wait_for_it.sh celery -A notifier.notify beat --loglevel=info
     env_file: .env
     volumes:
       - ./:/flights
     depends_on:
+      - postgres
       - redis
 
   notifier:
     # build: .
     image: flights
-    command: celery -A notifier worker -l info
+    command: bin/wait_for_it.sh celery -A notifier.notify worker -l info
     env_file: .env
     volumes:
       - ./:/flights
     depends_on:
+      - postgres
       - redis
       - beat_scheduler
 
