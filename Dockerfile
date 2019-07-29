@@ -19,4 +19,4 @@ RUN ["chmod", "+x", "bin/startup.sh", "bin/wait_for_it.sh"]
 
 ENV PYTHONPATH $PYTHONPATH:/flights/
 
-CMD ["bin/startup.sh"]
+CMD ["bash", "bin/startup.sh"]

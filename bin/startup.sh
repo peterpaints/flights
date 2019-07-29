@@ -2,7 +2,7 @@
 
 set -e
 
-. bin/wait_for_it.sh ;
+bash . bin/wait_for_it.sh ;
 
 cd api
 

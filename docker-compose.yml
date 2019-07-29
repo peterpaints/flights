@@ -30,7 +30,7 @@ services:
   beat_scheduler:
     build: .
     # image: flights
-    command: bin/wait_for_it.sh celery -A notifier.notify beat --loglevel=info
+    command: bash bin/wait_for_it.sh celery -A notifier.notify beat --loglevel=info
     env_file: .env
     volumes:
       - ./:/flights
@@ -41,7 +41,7 @@ services:
   notifier:
     build: .
     # image: flights
-    command: bin/wait_for_it.sh celery -A notifier.notify worker -l info
+    command: bash bin/wait_for_it.sh celery -A notifier.notify worker -l info
     env_file: .env
     volumes:
       - ./:/flights
