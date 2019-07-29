@@ -7,8 +7,9 @@ from flask_apispec import doc, marshal_with, use_kwargs
 from sqlalchemy import and_
 from datetime import datetime, timedelta
 
-from api.models.db import Flight
+from api.endpoints.tickets import TicketSchema
 from api.endpoints.util.auth import common_params, login_required, admin_required
+from api.models.db import Flight
 
 flights = Blueprint('flights', __name__)
 
@@ -23,7 +24,7 @@ class FlightSchema(mm.Schema):
     arrival = mm.fields.DateTime(required=True)
     price = mm.fields.Number(required=True)
     capacity = mm.fields.Integer(required=True)
-    tickets = mm.fields.List(mm.fields.Integer(), many=True)
+    tickets = mm.fields.Nested(TicketSchema, many=True)
 
 
 class FlightsSchema(mm.Schema):
@@ -83,7 +84,6 @@ def create(**kwargs):
 
 @flights.route('/api/flights', methods=('GET', ))
 @doc(params={**common_params, **date_range_params})
-@marshal_with(FlightsSchema())
 @login_required
 def get_all():
     """Get all flights."""
@@ -104,7 +104,13 @@ def get_all():
 
     flights = Flight.query.filter(
         and_(Flight.departure >= from_date, Flight.arrival <= to_date)).all()
-    return {'flights': flights}, 200
+    # FIXME: return {'flights': flights}, 200
+    # For some reason that doesn't work, even though
+    # it works in every other endpoint. E.g. L126
+    # ¯\_(ツ)_/¯
+    return {
+        'flights': [FlightSchema().dump(flight).data for flight in flights]
+    }, 200
 
 
 @flights.route('/api/flights/route', methods=('GET', ))
