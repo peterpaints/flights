@@ -20,7 +20,17 @@ docker-compose run flights python api/models/seed.py --email bla@bla.com --passw
 ```
 
 #### Info
-This is a test micro-app, written in Flask, and wrapped in Docker. Flask is light-weight, and affords one more control over how to design database models, configure security for the API endpoints and serialize responses back to clients
+This is a test micro-app, written in Flask, and wrapped in Docker. Flask is light-weight, and affords one more control over how to design database models, configure security for the API endpoints and serialize responses back to clients.
+
+Everything, from the redis server to the backend database runs on docker. To access the postgres instance running within docker, run `docker ps -a`, and select the container id of the postgres server.
+
+Then, run `docker exec -it <container_id> bash`
+
+Once you've opened the shell session, run `psql -U postgres flights`
+
+This connects you to the `flights` database. From here you can run `SQL` queries such as
+`SELECT * FROM flights;` to inspect various tables.
+
 
 #### The Endpoints
 
